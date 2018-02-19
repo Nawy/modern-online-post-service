@@ -1,10 +1,8 @@
 import java.time.Clock
 
 import com.google.inject.AbstractModule
-import org.telegram.telegrambots.exceptions.TelegramApiException
-import org.telegram.telegrambots.{ApiContextInitializer, TelegramBotsApi}
 import play.api.Logger
-import services.{ApplicationTimer, AtomicCounter, Counter, TelegramBot}
+import services.{ApplicationTimer, AtomicCounter, Counter, BotService}
 
 /**
  * This class is a Guice module that tells Guice how to bind several
@@ -27,16 +25,7 @@ class Module extends AbstractModule {
     // Set AtomicCounter as the implementation for Counter.
     bind(classOf[Counter]).to(classOf[AtomicCounter])
 
-    ApiContextInitializer.init()
-    val botsApi = new TelegramBotsApi()
-    try {
-      botsApi.registerBot(new TelegramBot())
-    } catch {
-      case exception: TelegramApiException => Logger.error("can't register bot!", exception)
-      case _ => Logger.error("unknown error happen while try register bot")
-    }
-    Logger.info("bot initialized")
-    println("bot initialized")
+    bind(classOf[BotService]).asEagerSingleton();
   }
 
 }
