@@ -36,7 +36,7 @@ class EmailBot(val token: String) extends TelegramBot with Polling with InlineQu
       case message if message.startsWith("/check") =>
         if (messages.isEmpty) reply("no messages")
         val amount: Int = getCheckMailMessagesNumber(getCommandValue(message))
-        messages.takeRight(amount).zipWithIndex.foreach { case (storedMessage, index) => reply(index + 1 + ") " + storedMessage) }
+        messages.takeRight(amount).reverse.zipWithIndex.foreach { case (storedMessage, index) => reply(index + 1 + ") " + storedMessage) }
       case "/amount" => reply(messages.length.toString)
       case _ => reply("unknown command, try /help")
     }
