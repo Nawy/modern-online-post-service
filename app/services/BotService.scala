@@ -3,43 +3,57 @@ package services
 import javax.inject.Singleton
 
 import info.mukel.telegrambot4s.api._
-import info.mukel.telegrambot4s.api.declarative.{Callbacks, Commands, InlineQueries}
-import info.mukel.telegrambot4s.models.{InlineKeyboardButton, InlineKeyboardMarkup}
+import info.mukel.telegrambot4s.api.declarative.{Commands, InlineQueries}
+import info.mukel.telegrambot4s.methods.ParseMode
 
 import scala.collection.mutable.ListBuffer
 
 
-class EmailBot(val token: String) extends TelegramBot with Polling with InlineQueries with Commands with Callbacks {
+class EmailBot(val token: String) extends TelegramBot with Polling with InlineQueries with Commands {
 
+  val CHECK_MAIL_DEFAULT_VALUE = 5
   val messages = new ListBuffer[String]()
-
-  val keyboard = InlineKeyboardMarkup.singleRow(
-    List(
-      InlineKeyboardButton.callbackData("Test1", "help"),
-      InlineKeyboardButton.callbackData("Test2", "Test2_Worked"),
-      InlineKeyboardButton.callbackData("Test3", "Test3_Worked")
-    )
-  )
-
-  onCallbackQuery(implicit callbackQuery => ackCallback(Some("button pushed")))
+  val commandsInfo: String = "You can use some of these commands:\n\n" +
+    "/help - commands list\n" +
+    "/send (text) - example: /send hello kate!\n" +
+    "/check - check recent emails\n" +
+    "/amount - find the total number of messages\n"
 
   onMessage { implicit msg =>
     msg.text.get match {
-      case "/help" => reply("/start, /send_mail, /check_mail, /mails_amount, /btn")
-      case "/start" => reply("/start, /send_mail, /check_mail, /mails_amount, /btn")
-      case message if message.startsWith("/send_mail") =>
-        val splittedMessage: Array[String] = message.split(" ", 2)
-        if (splittedMessage.length < 2) reply("no message")
-        messages += splittedMessage(1)
-        reply("mail send")
-      case "/check_mail" =>
+      case "/help" => reply(text = commandsInfo)
+      case "/start" => reply(
+        text = "<b align=\"center\">Bot for email!</b>\n" +
+          "<pre> We create bot that able to send and receive some emails from your friends </pre>\n\n" + commandsInfo,
+        parseMode = Some(ParseMode.HTML)
+      )
+      case message if message.startsWith("/send") =>
+        getCommandValue(message) match {
+          case null => reply("ERROR!!! no message!")
+          case s if s.trim.length == 0 => reply("ERROR!!! no message!")
+          case s if s.trim.length > 0 => messages += s.trim; reply("mail sent")
+        }
+      case message if message.startsWith("/check") =>
         if (messages.isEmpty) reply("no messages")
-
-        messages.foreach(reply(_))
-      case "/mails_amount" => reply(messages.length.toString)
-      case "/btn" => reply(text = "Email keyboard", replyMarkup = Some(keyboard))
-      case _ => reply("unknown command, try /help or /start")
+        val amount: Int = getCheckMailMessagesNumber(getCommandValue(message))
+        messages.takeRight(amount).zipWithIndex.foreach { case (storedMessage, index) => reply(index + 1 + ") " + storedMessage) }
+      case "/amount" => reply(messages.length.toString)
+      case _ => reply("unknown command, try /help")
     }
+  }
+
+  def getCheckMailMessagesNumber(s: String): Int = {
+    try {
+      s.toInt
+    } catch {
+      case _: Exception => CHECK_MAIL_DEFAULT_VALUE
+    }
+  }
+
+  // get value after command like: /command VALUE
+  def getCommandValue(message: String): String = {
+    val splittedMessage: Array[String] = message.split(" ", 2)
+    if (splittedMessage.length < 2) null else splittedMessage(1)
   }
 }
 
