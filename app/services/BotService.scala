@@ -15,7 +15,7 @@ class EmailBot(val token: String) extends TelegramBot with Polling with InlineQu
   val messages = new ListBuffer[String]()
   val commandsInfo: String = "You can use some of these commands:\n\n" +
     "/help - commands list\n" +
-    "/send (text) - example: /send hello kate!\n" +
+    "/send email message - example: /send ex@mail.ru hello kate!\n" +
     "/check - check recent emails\n" +
     "/amount - find the total number of messages\n"
 
@@ -28,14 +28,14 @@ class EmailBot(val token: String) extends TelegramBot with Polling with InlineQu
         parseMode = Some(ParseMode.HTML)
       )
       case message if message.startsWith("/send") =>
-        getCommandValue(message) match {
+        getTextWithoutFirstWord(message) match {
           case null => reply("ERROR!!! no message!")
-          case s if s.trim.length == 0 => reply("ERROR!!! no message!")
-          case s if s.trim.length > 0 => messages += s.trim; reply("mail sent")
+          case s if s.length == 0 => reply("ERROR!!! no message!")
+          case s if s.length > 0 => messages += s; reply("mail sent")
         }
       case message if message.startsWith("/check") =>
         if (messages.isEmpty) reply("no messages")
-        val amount: Int = getCheckMailMessagesNumber(getCommandValue(message))
+        val amount: Int = getCheckMailMessagesNumber(getTextWithoutFirstWord(message))
         messages.takeRight(amount).reverse.zipWithIndex.foreach { case (storedMessage, index) => reply(index + 1 + ") " + storedMessage) }
       case "/amount" => reply(messages.length.toString)
       case _ => reply("unknown command, try /help")
@@ -51,9 +51,9 @@ class EmailBot(val token: String) extends TelegramBot with Polling with InlineQu
   }
 
   // get value after command like: /command VALUE
-  def getCommandValue(message: String): String = {
+  def getTextWithoutFirstWord(message: String): String = {
     val splittedMessage: Array[String] = message.split(" ", 2)
-    if (splittedMessage.length < 2) null else splittedMessage(1)
+    if (splittedMessage.length < 2) null else splittedMessage(1).trim
   }
 }
 
