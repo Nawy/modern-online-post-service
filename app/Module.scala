@@ -2,7 +2,7 @@ import java.time.Clock
 
 import com.google.inject.AbstractModule
 import play.api.Logger
-import services.{ApplicationTimer, AtomicCounter, Counter, BotService}
+import services.{ApplicationTimer, MessageService, Counter, BotService}
 
 /**
  * This class is a Guice module that tells Guice how to bind several
@@ -23,7 +23,7 @@ class Module extends AbstractModule {
     // application starts.
     bind(classOf[ApplicationTimer]).asEagerSingleton()
     // Set AtomicCounter as the implementation for Counter.
-    bind(classOf[Counter]).to(classOf[AtomicCounter])
+    bind(classOf[Counter]).to(classOf[MessageService])
     bind(classOf[BotService]).asEagerSingleton()
   }
 
