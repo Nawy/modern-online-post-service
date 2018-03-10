@@ -10,4 +10,8 @@ case class User(
                  var fullName: String,
                  var messages: Map[String, ArrayBuffer[Message]],
                  var spam: Map[String, ArrayBuffer[Message]]
-               ) {}
+               ) {
+
+  def toUserInfo: UserInfo = UserInfo(Some(id), email, password, phoneNumber, fullName)
+
+}
