@@ -12,6 +12,7 @@ scalaVersion := "2.12.2"
 
 libraryDependencies ++= Seq(jdbc, ehcache, ws, specs2 % Test, guice)
 libraryDependencies += "info.mukel" %% "telegrambot4s" % "3.0.14"
+libraryDependencies += "com.github.salat" %% "salat" % "1.11.2"
 
 
 

@@ -7,10 +7,8 @@ import services.MessageService
 
 
 @Singleton
-class MessageController @Inject()(cc: ControllerComponents, messageService: MessageService) extends AbstractController(cc) {
+class MessageController @Inject()(cc: ControllerComponents) extends AbstractController(cc) {
 
-/*  def index = Action {
-    Ok(views.html.index("Your new application is ready."))
-  }*/
+
 
 }
