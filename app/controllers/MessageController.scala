@@ -11,7 +11,6 @@ import scala.collection.mutable.ArrayBuffer
 @Singleton
 class MessageController @Inject()(cc: ControllerComponents) extends AbstractController(cc) {
 
-  implicit val enum: Format[MessageType.Value] = Json.format[MessageType.Value]
   implicit val createMessageDtoFormatter: Format[CreateMessageDto] = Json.format[CreateMessageDto]
 
 
@@ -48,7 +47,7 @@ class MessageController @Inject()(cc: ControllerComponents) extends AbstractCont
     Ok
   }*/
 
-  case class CreateMessageDto(messageType: MessageType.Value, text: String) {
+  case class CreateMessageDto(messageType: String, text: String) {
     def toMessage = Message(messageType = messageType, text = text)
   }
 }

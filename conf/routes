@@ -5,12 +5,12 @@
 
 
 
-GET           /users/:id         controllers.UserController.get(id:String)
-POST          /users/save        controllers.UserController.save
-POST          /users             controllers.UserController.insert
-DELETE        /users/:id         controllers.UserController.delete(id:String)
+GET            /users/:id         controllers.UserController.get(id:String)
+POST           /users/save        controllers.UserController.save
+POST           /users             controllers.UserController.insert
+DELETE         /users/:id         controllers.UserController.delete(id:String)
 
-GET           /messages          controllers.AsyncController.message
+POST           /messages          controllers.MessageController.insert
 
 
       

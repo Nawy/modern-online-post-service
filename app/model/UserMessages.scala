@@ -3,7 +3,7 @@ package model
 import com.mongodb.casbah.Imports.ObjectId
 import config.MongoConfig
 import salat.dao.SalatDAO
-import salat.global._
+import config.SalatContext._
 import scala.collection.mutable.ArrayBuffer
 
 case class UserMessages(_id: String = new ObjectId().toHexString,
