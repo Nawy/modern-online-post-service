@@ -3,15 +3,15 @@ package model
 import com.mongodb.casbah.Imports.ObjectId
 import config.MongoConfig
 import salat.dao.SalatDAO
-
+import salat.global._
 import scala.collection.mutable.ArrayBuffer
 
-case class UserMessages(var _id: ObjectId = new ObjectId,
-                        var messages: Map[String, ArrayBuffer[Message]],
-                        var spam: Map[String, ArrayBuffer[Message]])
+case class UserMessages(_id: String = new ObjectId().toHexString,
+                        messages: Map[String, ArrayBuffer[Message]] = Map.empty,
+                        spam: Map[String, ArrayBuffer[Message]] = Map.empty)
 
 
-object UserMessagesDAO extends SalatDAO[UserMessages, ObjectId](
+object UserMessagesDAO extends SalatDAO[UserMessages, String](
   MongoConfig.mongoConnection("messages")
 )
 

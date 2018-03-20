@@ -3,7 +3,6 @@ package controllers
 import javax.inject._
 
 import model.{User, UserDAO}
-import org.bson.types.ObjectId
 import play.api.libs.json._
 import play.api.mvc._
 
@@ -11,11 +10,15 @@ import play.api.mvc._
 class UserController @Inject()(cc: ControllerComponents) extends AbstractController(cc) {
 
   implicit val createUserDtoReads: Format[CreateUserDto] = Json.format[CreateUserDto]
-  implicit val userDtoReads: Format[User] = Json.format[User]
+  implicit val userDtoRFormat: Format[User] = Json.format[User]
 
   def insert() = Action(parse.json) { request =>
     request.body.validate[CreateUserDto].asOpt
-      .map(userDto => Ok(UserDAO.insert(userDto.toUser)))
+      .map(userDto => {
+        val user = userDto.toUser
+        UserDAO.insert(user)
+        Ok(user._id)
+      })
       .getOrElse(BadRequest)
   }
 
@@ -23,23 +26,23 @@ class UserController @Inject()(cc: ControllerComponents) extends AbstractControl
     request.body.validate[User].asOpt
       .map(user => {
         UserDAO.save(user)
-        Ok(user._id)
+        Ok(Json.toJson(user._id))
       })
       .getOrElse(BadRequest)
   }
 
   def get(id: String) = Action {
-    UserDAO.findOneById(new ObjectId(id))
+    UserDAO.findOneById(id)
       .map(user => Ok(Json.toJson(user)))
-      .getOrElse(BadRequest)
+      .getOrElse(NotFound)
   }
 
   def delete(id: String) = Action {
-    UserDAO.removeById(new ObjectId(id))
+    UserDAO.removeById(id)
     Ok
   }
 }
 
-case class CreateUserDto(var email: String, var password: String) {
+case class CreateUserDto(email: String, password: String) {
   def toUser: User = User(email = email, password = password)
 }

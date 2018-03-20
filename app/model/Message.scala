@@ -2,9 +2,9 @@ package model
 
 import java.time.LocalDateTime
 
-case class Message(
-                    var id: Long,
-                    var messageType: MessageType.Value,
-                    var text: String,
-                    var date: LocalDateTime
-                  ) {}
+import com.mongodb.casbah.Imports.ObjectId
+
+case class Message(_id: String = new ObjectId().toHexString,
+                   messageType: MessageType.Value,
+                   text: String,
+                   date: LocalDateTime = LocalDateTime.now)
