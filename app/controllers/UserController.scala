@@ -1,14 +1,18 @@
 package controllers
 
+import java.time.LocalDateTime
 import javax.inject._
 
-import model.{User, UserDAO}
+import model.User
 import play.api.libs.json._
 import play.api.mvc._
+import utils.JsonParsers
+import reactivemongo.play.json.BSONFormats._
 
 @Singleton
 class UserController @Inject()(cc: ControllerComponents) extends AbstractController(cc) {
 
+  implicit val localDateTimeFormatter: Format[LocalDateTime] = JsonParsers.LocalDateTimeFormatter
   implicit val createUserDtoReads: Format[CreateUserDto] = Json.format[CreateUserDto]
   implicit val userDtoRFormat: Format[User] = Json.format[User]
 
@@ -17,7 +21,7 @@ class UserController @Inject()(cc: ControllerComponents) extends AbstractControl
       .map(userDto => {
         val user = userDto.toUser
         UserDAO.insert(user)
-        Ok(user._id)
+        Ok(Json.obj("id" -> user._id))
       })
       .getOrElse(BadRequest)
   }
@@ -26,7 +30,7 @@ class UserController @Inject()(cc: ControllerComponents) extends AbstractControl
     request.body.validate[User].asOpt
       .map(user => {
         UserDAO.save(user)
-        Ok(Json.toJson(user._id))
+        Ok(Json.obj("id" -> user._id))
       })
       .getOrElse(BadRequest)
   }

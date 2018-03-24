@@ -1,53 +1,51 @@
 package controllers
 
+import java.time.LocalDateTime
 import javax.inject._
 
-import model.{MessageType, _}
-import play.api.libs.json.{Format, Json}
+import model._
+import org.mongodb.scala.bson.ObjectId
+import play.api.libs.json._
 import play.api.mvc._
-
-import scala.collection.mutable.ArrayBuffer
+import services.MessageService
+import utils.JsonParsers
+import reactivemongo.play.json.BSONFormats._
 
 @Singleton
-class MessageController @Inject()(cc: ControllerComponents) extends AbstractController(cc) {
+class MessageController @Inject()(cc: ControllerComponents, messageService: MessageService) extends AbstractController(cc) {
 
+  implicit val localDateTimeFormatter: Format[LocalDateTime] = JsonParsers.LocalDateTimeFormatter
   implicit val createMessageDtoFormatter: Format[CreateMessageDto] = Json.format[CreateMessageDto]
+  implicit val messageFormatter: Format[Message] = Json.format[Message]
 
 
-  def insert() = Action(parse.json) { request =>
+  def send(): Action[JsValue] = Action(parse.json) { request =>
     request.body.validate[CreateMessageDto].asOpt
       .map(messageDto => {
-        val message = messageDto.toMessage
-        val userMessages = UserMessages(messages = Map("test" -> ArrayBuffer(message)))
-        UserMessagesDAO.insert(userMessages)
-        Ok(userMessages._id)
+        val message = messageDto.makeMessage
+        val ownerEmail = message.senderEmail
+        val chatId = message.recipientEmail
+
+        val userMessages: UserMessages = messageService.sendMessage(message, ownerEmail, chatId)
+
+        Ok(Json.obj(
+          "messagesId" -> userMessages._id,
+          "chatId" -> chatId,
+          "messageId" -> message._id
+        ))
       })
       .getOrElse(BadRequest)
   }
 
-  /*
-    def save() = Action(parse.json) { request =>
-      request.body.validate[User].asOpt
-        .map(user => {
-          UserDAO.save(user)
-          Ok(Json.toJson(user._id))
-        })
-        .getOrElse(BadRequest)
-    }
-  */
+  def get(email: String, opponent: String) = Action {
 
-/*  def get(id: String) = Action {
-    UserMessagesDAO.findOneById(id)
-      .map(userMessages => Ok(Json.toJson(userMessages)))
-      .getOrElse(NotFound)
+    messageService.getChat(email, opponent)
+      .filter(_.isEmpty)
+      .map(chat => Ok(Json.toJson(chat)))
+      .getOrElse(NotFound("[]"))
   }
 
-  def delete(id: String) = Action {
-    UserMessagesDAO.removeById(id)
-    Ok
-  }*/
-
-  case class CreateMessageDto(messageType: String, text: String) {
-    def toMessage = Message(messageType = messageType, text = text)
+  case class CreateMessageDto(text: String, senderEmail: String, recipientEmail: String) {
+    def makeMessage = Message(text = text, senderEmail = senderEmail, recipientEmail = recipientEmail)
   }
 }

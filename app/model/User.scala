@@ -1,19 +1,12 @@
 package model
 
-import com.mongodb.casbah.Imports.ObjectId
-import config.MongoConfig
-import config.SalatContext._
-import salat.annotations.raw.Salat
-import salat.dao.SalatDAO
+import reactivemongo.bson.BSONObjectID
 
-case class User(_id: String = new ObjectId().toHexString,
+
+case class User(_id: BSONObjectID = BSONObjectID.generate,
                 email: String,
                 password: String,
-                phoneNumber: String = null,
-                fullName: String = null)
+                phoneNumber: Option[String] = None,
+                fullName: Option[String] = None)
 
-@Salat
-object UserDAO extends SalatDAO[User, String](
-  MongoConfig.mongoConnection("user")
-)
 

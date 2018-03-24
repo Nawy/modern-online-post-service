@@ -10,11 +10,9 @@ resolvers += "Akka Snapshot Repository" at "http://repo.akka.io/snapshots/"
       
 scalaVersion := "2.12.2"
 
-libraryDependencies ++= Seq(jdbc, ehcache, ws, specs2 % Test, guice)
+libraryDependencies ++= Seq(ehcache, specs2 % Test, guice)
 libraryDependencies += "info.mukel" %% "telegrambot4s" % "3.0.14"
-libraryDependencies += "com.github.salat" %% "salat" % "1.11.2"
-
-
+libraryDependencies += "org.reactivemongo" %% "play2-reactivemongo" % "0.13.0-play26"
 
 unmanagedResourceDirectories in Test <+=  baseDirectory ( _ /"target/web/public/test" )  
 

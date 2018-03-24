@@ -1,19 +1,21 @@
 package model
 
-import com.mongodb.casbah.Imports.ObjectId
-import config.MongoConfig
-import salat.dao.SalatDAO
-import config.SalatContext._
-import scala.collection.mutable.ArrayBuffer
+import org.bson.types.ObjectId
+import reactivemongo.bson.BSONObjectID
+
+
+case class Message(_id: BSONObjectID = BSONObjectID.generate,
+                   senderEmail: String,
+                   recipientEmail: String,
+                   text: String/*, date: LocalDateTime = LocalDateTime.now*/)
 
 case class UserMessages(_id: String = new ObjectId().toHexString,
-                        messages: Map[String, ArrayBuffer[Message]] = Map.empty,
-                        spam: Map[String, ArrayBuffer[Message]] = Map.empty)
+                        ownerEmail: String,
+                        var messages: Map[String, List[Message]] = Map.empty,
+                        var spam: Map[String, List[Message]] = Map.empty)
 
-
-object UserMessagesDAO extends SalatDAO[UserMessages, String](
-  MongoConfig.mongoConnection("messages")
-)
+case class UserMessagesQueryObject(_id: Option[ObjectId] = None,
+                                   ownerEmail: Option[String] = None)
 
 
 
