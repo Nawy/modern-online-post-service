@@ -7,7 +7,6 @@
 
 GET           /users/:id        controllers.UserController.get(id:String)
 POST          /users            controllers.UserController.save
-PUT           /users            controllers.UserController.insert
 DELETE        /users/:id        controllers.UserController.delete(id:String)
 
 GET           /messages         controllers.MessageController.get(email: String, opponent: String)

@@ -1,23 +1,18 @@
 package controllers
 
-import java.time.LocalDateTime
 import javax.inject._
 
 import model._
-import org.mongodb.scala.bson.ObjectId
 import play.api.libs.json._
 import play.api.mvc._
-import services.MessageService
-import utils.JsonParsers
 import reactivemongo.play.json.BSONFormats._
+import services.MessageService
 
 @Singleton
 class MessageController @Inject()(cc: ControllerComponents, messageService: MessageService) extends AbstractController(cc) {
 
-  implicit val localDateTimeFormatter: Format[LocalDateTime] = JsonParsers.LocalDateTimeFormatter
+  import myutils.JsonParsers._
   implicit val createMessageDtoFormatter: Format[CreateMessageDto] = Json.format[CreateMessageDto]
-  implicit val messageFormatter: Format[Message] = Json.format[Message]
-
 
   def send(): Action[JsValue] = Action(parse.json) { request =>
     request.body.validate[CreateMessageDto].asOpt

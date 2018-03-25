@@ -1,48 +1,38 @@
 package controllers
 
-import java.time.LocalDateTime
 import javax.inject._
 
 import model.User
 import play.api.libs.json._
 import play.api.mvc._
-import utils.JsonParsers
+import reactivemongo.bson.BSONObjectID
 import reactivemongo.play.json.BSONFormats._
+import repository.UserRepository
 
 @Singleton
-class UserController @Inject()(cc: ControllerComponents) extends AbstractController(cc) {
+class UserController @Inject()(cc: ControllerComponents, userRepository: UserRepository) extends AbstractController(cc) {
 
-  implicit val localDateTimeFormatter: Format[LocalDateTime] = JsonParsers.LocalDateTimeFormatter
+  import myutils.JsonParsers._
+
   implicit val createUserDtoReads: Format[CreateUserDto] = Json.format[CreateUserDto]
-  implicit val userDtoRFormat: Format[User] = Json.format[User]
-
-  def insert() = Action(parse.json) { request =>
-    request.body.validate[CreateUserDto].asOpt
-      .map(userDto => {
-        val user = userDto.toUser
-        UserDAO.insert(user)
-        Ok(Json.obj("id" -> user._id))
-      })
-      .getOrElse(BadRequest)
-  }
 
   def save() = Action(parse.json) { request =>
     request.body.validate[User].asOpt
       .map(user => {
-        UserDAO.save(user)
+        userRepository.save(user)
         Ok(Json.obj("id" -> user._id))
       })
       .getOrElse(BadRequest)
   }
 
   def get(id: String) = Action {
-    UserDAO.findOneById(id)
+    userRepository.get(BSONObjectID.parse(id).get)
       .map(user => Ok(Json.toJson(user)))
       .getOrElse(NotFound)
   }
 
   def delete(id: String) = Action {
-    UserDAO.removeById(id)
+    userRepository.remove(BSONObjectID.parse(id).get)
     Ok
   }
 }
